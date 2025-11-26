@@ -1,0 +1,11 @@
+.confirm-remove {
+ 
+
+    .container {
+        font-size: 1.2rem;
+        margin: auto;
+        text-align: center;
+        opacity: 1;
+        border-radius: .3em;
+    }
+}

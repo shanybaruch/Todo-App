@@ -1,0 +1,11 @@
+.todo-index {
+    position: relative;
+
+    .section-confirm-remove {
+        background-color: var(--clr2bg);
+        border-radius: .4em;
+        position: absolute;
+        max-width: 60vw;
+
+    }
+}
