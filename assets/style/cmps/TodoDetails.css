@@ -4,7 +4,7 @@
     align-items: flex-start;
 }
 .todo-details h1 {
-    color: var(--clr1);
+    color: var(--gray3);
     font-size: 2em;
     
 }

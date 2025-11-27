@@ -4,93 +4,52 @@ const { createStore } = Redux
 
 // Todo
 export const SET_TODOS = 'SET_TODOS'
-export const REMOVE_TODO = 'REMOVE_TODO'
 export const ADD_TODO = 'ADD_TODO'
+export const REMOVE_TODO = 'REMOVE_TODO'
 export const UPDATE_TODO = 'UPDATE_TODO'
-export const SET_IS_LOADING = 'SET_IS_LOADING'
 
-export const SET_FILTER_BY = 'SET_FILTER_BY'
-export const REMOVE_TODO_UNDO = 'REMOVE_TODO_UNDO'
+export const SET_DONE_TODOS_PERCENT = 'SET_DONE_TODOS_PERCENT'
+export const SET_MAX_PAGE = 'SET_MAX_PAGE'
+export const SET_IS_LOADING = 'SET_IS_LOADING'
 
 // User
 export const SET_USER = 'SET_USER'
-export const SET_USER_SCORE = 'SET_USER_SCORE'
+export const SET_USER_BALANCE = 'SET_USER_BALANCE'
 
-
-// Shopping cart
-export const TOGGLE_CART_IS_SHOWN = 'TOGGLE_CART_IS_SHOWN'
-export const ADD_TODO_TO_CART = 'ADD_TODO_TO_CART'
-export const REMOVE_TODO_FROM_CART = 'REMOVE_TODO_FROM_CART'
-export const CLEAR_CART = 'CLEAR_CART'
 
 const initialState = {
-    count: 100,
     todos: [],
-    isLoading: false,
     loggedinUser: userService.getLoggedinUser(),
-    isCartShown: false,
-    shoppingCart: []
+    isLoading: false,
+    maxPage: null,
+    doneTodosPercent: 0,
 }
 
 function appReducer(state = initialState, cmd = {}) {
-    switch (cmd.type) {
-        case SET_TODOS:
-            return {
-                ...state,
-                todos: [...cmd.todos]
-            }
-        case REMOVE_TODO:
-            return {
-                ...state,
-                todos: state.todos.filter(todo => todo._id !== cmd.todoId)
-            }
-        case ADD_TODO:
-            return {
-                ...state,
-                todos: [cmd.todo, ...state.todos]
-            }
-        case UPDATE_TODO:
-            return {
-                ...state,
-                todos: state.todos.map(todo => (todo._id === cmd.todo._id) ? cmd.todo : todo)
-            }
-        case SET_IS_LOADING:
-            return {
-                ...state,
-                isLoading: cmd.isLoading
-            }
-        case SET_USER:
-            return {
-                ...state,
-                loggedinUser: cmd.loggedinUser
-            }
-        case SET_USER_SCORE:
-            return {
-                ...state,
-                loggedinUser: { ...cmd.loggedinUser, score: cmd.score }
-            }
-        case TOGGLE_CART_IS_SHOWN:
-            return {
-                ...state,
-                isCartShown: !state.isCartShown
-            }
-        case ADD_TODO_TO_CART:
-            return {
-                ...state,
-                shoppingCart: [...state.shoppingCart, cmd.todo]
-            }
-        case REMOVE_TODO_FROM_CART:
-            return {
-                ...state,
-                shoppingCart: state.shoppingCart.filter(todo => todo._id !== cmd.todoId)
-            }
-        case CLEAR_CART:
-            return {
-                ...state,
-                shoppingCart: []
-            }
 
-        default: return state
+    switch (cmd.type) {
+
+        case SET_TODOS:
+            return { ...state, todos: [...cmd.todos] }
+        case REMOVE_TODO:
+            return { ...state, todos: state.todos.filter(todo => todo._id !== cmd.todoId) }
+        case ADD_TODO:
+            return { ...state, todos: [cmd.todo, ...state.todos] }
+        case UPDATE_TODO:
+            return { ...state, todos: state.todos.map(todo => (todo._id === cmd.todo._id) ? cmd.todo : todo) }
+        case SET_DONE_TODOS_PERCENT:
+            return { ...state, doneTodosPercent: cmd.doneTodosPercent }
+        case SET_MAX_PAGE:
+            return { ...state, maxPage: cmd.maxPage }
+        case SET_IS_LOADING:
+            return { ...state, isLoading: cmd.isLoading }
+        case SET_USER:
+            return { ...state, loggedinUser: cmd.loggedinUser }
+        case SET_USER_BALANCE:
+            return { ...state, loggedinUser: { ...cmd.loggedinUser, score: cmd.score } }
+        
+        default: 
+            return state
     }
 }
 

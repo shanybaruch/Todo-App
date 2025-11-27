@@ -11,7 +11,7 @@
 }
 
 .user-msg.success {
-    background-color: var(--clr1);
+    background-color: var(--gray3);
 }
 
 .user-msg.error {

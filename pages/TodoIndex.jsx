@@ -61,7 +61,7 @@ export function TodoIndex() {
             </div>
             <h2>Todos List</h2>
             <TodoList todos={todos} onRemoveTodo={onRemoveTodo} onToggleTodo={onToggleTodo} />
-            <hr />
+            {/* <hr /> */}
             <h2>Todos Table</h2>
         </section>
     )
