@@ -3,17 +3,18 @@ import { TodoList } from "../cmps/TodoList.jsx"
 import { todoService } from "../services/todo.service.js"
 import { showErrorMsg, showSuccessMsg } from "../services/event-bus.service.js"
 import { ConfirmRemove } from "../cmps/ConfirmRemove.jsx"
+import { todoActions } from "../store/actions/todo.actions.js"
 
 const { useState, useEffect } = React
 const { Link, useSearchParams } = ReactRouterDOM
+const { useSelector, useDispatch } = ReactRedux
 
 export function TodoIndex() {
 
-    // const todos = useSelector((state) => state.todos)
-    const [todos, setTodos] = useState(null)
-    const [showRemoveModal, setShowRemoveModal] = useState(false)
-    const [todoIdToDelete, setTodoIdToDelete] = useState(null)
-    // Special hook for accessing search-params:
+    const dispatch = useDispatch()
+
+    const todos = useSelector((state) => state.todos)
+    // const [todos, setTodos] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
 
     const defaultFilter = todoService.getFilterFromSearchParams(searchParams)
@@ -22,47 +23,27 @@ export function TodoIndex() {
 
     useEffect(() => {
         setSearchParams(filterBy)
-        todoService.query(filterBy)
-            .then(todos => setTodos(todos))
-            .catch(err => {
-                console.eror('err:', err)
-                showErrorMsg('Cannot load todos')
-            })
+        todoActions.loadTodos(filterBy)
     }, [filterBy])
 
     function onRemoveTodo(todoId) {
-        todoService.remove(todoId)
+        const ans = confirm('Do you want to delete this todo?')
+        if (!ans) return
+        todoActions.removeTodo(todoId)
             .then(() => {
-                setTodos(prevTodos => prevTodos.filter(todo => todo._id !== todoId))
+                // setTodos(prevTodos => prevTodos.filter(todo => todo._id !== todoId))
                 showSuccessMsg(`Todo removed`)
             })
             .catch(err => {
-                console.log('err:', err)
+                console.error('err:', err)
                 showErrorMsg('Cannot remove todo ' + todoId)
             })
     }
 
-    function onCancelModal() {
-        console.log('cancel remove');
-        setShowRemoveModal(false)
-        setTodoIdToDelete(null)
-    }
-
-    function onConfirmModal() {
-        console.log('confirm remove');
-        setShowRemoveModal(false)
-
-        if (todoIdToDelete) {
-            onRemoveTodo(todoIdToDelete) 
-            setTodoIdToDelete(null)    
-        }
-    }
-
     function onToggleTodo(todo) {
         const todoToSave = { ...todo, isDone: !todo.isDone }
-        todoService.save(todoToSave)
+        todoService.saveTodo(todoToSave)
             .then((savedTodo) => {
-                setTodos(prevTodos => prevTodos.map(currTodo => (currTodo._id !== todo._id) ? currTodo : { ...savedTodo }))
                 showSuccessMsg(`Todo is ${(savedTodo.isDone) ? 'done' : 'back on your list'}`)
             })
             .catch(err => {
@@ -78,19 +59,10 @@ export function TodoIndex() {
             <div>
                 <Link to="/todo/edit" className="btn" >Add Todo</Link>
             </div>
-            {
-                showRemoveModal &&
-                <div className="section-confirm-remove">
-                    <ConfirmRemove onCancelModal={onCancelModal} onConfirmModal={onConfirmModal} />
-                </div>
-            }
             <h2>Todos List</h2>
-            <TodoList setTodoIdToDelete={setTodoIdToDelete} setOpenModal={setShowRemoveModal} todos={todos} onRemoveTodo={onRemoveTodo} onToggleTodo={onToggleTodo} />
+            <TodoList todos={todos} onRemoveTodo={onRemoveTodo} onToggleTodo={onToggleTodo} />
             <hr />
             <h2>Todos Table</h2>
-
-
-
         </section>
     )
 }

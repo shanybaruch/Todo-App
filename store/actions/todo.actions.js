@@ -1,8 +1,13 @@
-import { todoService } from "../services/todo.service.js"
-import { ADD_TODO, REMOVE_TODO, SET_TODOS, SET_IS_LOADING, store, UPDATE_TODO } from "./store.js"
+import { todoService } from "../../services/todo.service.js"
+import { ADD_TODO, REMOVE_TODO, SET_TODOS, SET_IS_LOADING, store, UPDATE_TODO } from "../store.js"
 
+export const todoActions = {
+    loadTodos,
+    removeTodo,
+    saveTodo,
+}
 
-export function loadTodos(filterBy) {
+function loadTodos(filterBy) {
 
     store.dispatch({ type: SET_IS_LOADING, isLoading: true })
 
@@ -19,7 +24,7 @@ export function loadTodos(filterBy) {
         })
 }
 
-export function removeTodo(todoId) {
+function removeTodo(todoId) {
     return todoService.remove(todoId)
         .then(() => {
             store.dispatch({ type: REMOVE_TODO, todoId })
@@ -30,7 +35,7 @@ export function removeTodo(todoId) {
         })
 }
 
-export function saveTodo(todoToSave) {
+function saveTodo(todoToSave) {
     const type = todoToSave._id ? UPDATE_TODO : ADD_TODO
 
     return todoService.save(todoToSave)
