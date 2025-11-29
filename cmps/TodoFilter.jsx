@@ -8,7 +8,6 @@ export function TodoFilter({ filterBy, onSetFilterBy }) {
     onSetFilterBy = useRef(utilService.debounce(onSetFilterBy, 500))
 
     useEffect(() => {
-        // Notify parent
         onSetFilterBy.current(filterByToEdit)
     }, [filterByToEdit])
 
@@ -45,9 +44,9 @@ export function TodoFilter({ filterBy, onSetFilterBy }) {
             <form onSubmit={onSubmitFilter}>
 
                 <select value={isDone} className="flex justify-center align-center" name="isDone" onChange={(ev) => handleChange(ev)}>
-                    <option value="All">All</option>
-                    <option value="Undone">Active</option>
-                    <option value="Done">Done</option>
+                    <option value="all">All</option>
+                    <option value="undone">Active</option>
+                    <option value="done">Done</option>
                 </select>
 
                 <section>
