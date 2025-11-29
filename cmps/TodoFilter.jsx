@@ -1,12 +1,15 @@
-const { useState, useEffect } = React
+import { utilService } from "../services/util.service.js"
+
+const { useState, useEffect, useRef } = React
 
 export function TodoFilter({ filterBy, onSetFilterBy }) {
 
-    const [filterByToEdit, setFilterByToEdit] = useState({...filterBy})
+    const [filterByToEdit, setFilterByToEdit] = useState({ ...filterBy })
+    onSetFilterBy = useRef(utilService.debounce(onSetFilterBy, 500))
 
     useEffect(() => {
         // Notify parent
-        onSetFilterBy(filterByToEdit)
+        onSetFilterBy.current(filterByToEdit)
     }, [filterByToEdit])
 
     function handleChange({ target }) {
@@ -35,21 +38,32 @@ export function TodoFilter({ filterBy, onSetFilterBy }) {
         onSetFilterBy(filterByToEdit)
     }
 
-    const { txt, importance } = filterByToEdit
+    const { txt, importance, isDone } = filterByToEdit
     return (
         <section className="todo-filter">
             <h2>Filter Todos</h2>
+
             <form onSubmit={onSubmitFilter}>
-                <input value={txt} onChange={handleChange}
-                    type="search" placeholder="By Txt" id="txt" name="txt"
-                />
-                {/* <label htmlFor="importance">Importance: </label> */}
-                <input value={importance} onChange={handleChange}
-                    type="number" placeholder="By Importance" id="importance" name="importance"
-                />
+
+                <select value={isDone} className="flex justify-center align-center" name="isDone" onChange={(ev) => handleChange(ev)}>
+                    <option value="All">All</option>
+                    <option value="Undone">Active</option>
+                    <option value="Done">Done</option>
+                </select>
+
+                <section>
+                    <input value={txt} onChange={handleChange}
+                        type="search" placeholder="By Txt" id="txt" name="txt"
+                    />
+
+                    <input value={importance} onChange={handleChange}
+                        type="number" placeholder="By Importance" id="importance" name="importance"
+                    />
+                </section>
 
                 <button hidden>Set Filter</button>
             </form>
+
         </section>
     )
 }

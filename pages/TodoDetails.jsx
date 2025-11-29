@@ -26,7 +26,6 @@ export function TodoDetails() {
     }
 
     function onBack() {
-        // If nothing to do here, better use a Link
         navigate('/todo')
         // navigate(-1)
     }
@@ -34,7 +33,7 @@ export function TodoDetails() {
     if (!todo) return <div>Loading...</div>
     return (
         <section className="todo-details">
-            <h1 className={(todo.isDone)? 'done' : ''}>{todo.txt}</h1>
+            <h1 className={(todo.isDone)? 'done' : 'in progress'}>{todo.txt}</h1>
             <h2>{(todo.isDone)? 'Done!' : 'In your list'}</h2>
 
             <h1>Todo importance: {todo.importance}</h1>

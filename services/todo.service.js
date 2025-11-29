@@ -1,7 +1,10 @@
 import { utilService } from './util.service.js'
 import { storageService } from './async-storage.service.js'
+import { userService } from './user.service.js'
 
 const TODO_KEY = 'todoDB'
+const PAGE_SIZE = 4
+var gFilteredTodosLength
 _createTodos()
 
 export const todoService = {
@@ -13,13 +16,13 @@ export const todoService = {
     getDefaultFilter,
     getFilterFromSearchParams,
     getImportanceStats,
+    getDoneTodosPercent
 }
-// For Debug (easy access from console):
-window.cs = todoService
 
 function query(filterBy = {}) {
     return storageService.query(TODO_KEY)
         .then(todos => {
+
             if (filterBy.txt) {
                 const regExp = new RegExp(filterBy.txt, 'i')
                 todos = todos.filter(todo => regExp.test(todo.txt))
@@ -29,7 +32,28 @@ function query(filterBy = {}) {
                 todos = todos.filter(todo => todo.importance >= filterBy.importance)
             }
 
-            return todos
+            if (filterBy.isDone !== 'all') {
+                todos = todos.filter((todo) => (filterBy.isDone === 'done' ? todo.isDone : !todo.isDone))
+            }
+
+            if (filterBy.sort) {
+                if (filterBy.sort === 'txt') {
+                    todos = todos.sort((a, b) => a.txt.localeCompare(b.txt));
+                } else {
+                    todos = todos.sort((a, b) => a.createdAt - b.createdAt);
+                }
+            }
+
+            gFilteredTodosLength = todos.length
+            if (filterBy.pageIdx !== undefined) {
+                const startIdx = filterBy.pageIdx * PAGE_SIZE;
+                todos = todos.slice(startIdx, startIdx + PAGE_SIZE)
+            }
+            return Promise.all([getDoneTodosPercent(), getMaxPage()])
+                .then(([doneTodosPercent, maxPage]) => {
+                    return { todos, maxPage, doneTodosPercent }
+                })
+
         })
 }
 
@@ -39,22 +63,83 @@ function get(todoId) {
             todo = _setNextPrevTodoId(todo)
             return todo
         })
+        .catch(err => {
+            console.error('Cannot get todo:', err)
+            throw err
+        })
 }
 
 function remove(todoId) {
     return storageService.remove(TODO_KEY, todoId)
+        .then(() => {
+            return Promise.all([getDoneTodosPercent(), getMaxPage()])
+                .then(([doneTodosPercent, maxPage]) => {
+                    return { maxPage, doneTodosPercent }
+                })
+        })
+        .catch(err => {
+            console.error('Cannot remove todo:', err)
+            throw err
+        })
 }
 
 function save(todo) {
-    if (todo._id) {
-        // TODO - updatable fields
-        todo.updatedAt = Date.now()
-        return storageService.put(TODO_KEY, todo)
-    } else {
-        todo.createdAt = todo.updatedAt = Date.now()
+    if (!userService.getLoggedinUser()) return Promise.reject('User is not logged in')
+    return ((todo._id) ? _edit(todo) : _add(todo))
+        .then((savedTodo) => {
+            return Promise.all([getDoneTodosPercent(), getMaxPage()])
+                .then(([doneTodosPercent, maxPage]) =>
+                    ({ maxPage, doneTodosPercent, savedTodo })
+                )
+        })
+}
 
-        return storageService.post(TODO_KEY, todo)
-    }
+function _add(todo) {
+    todo.createdAt = todo.updatedAt = Date.now()
+    todo.color = utilService.getRandomColor()
+    return storageService.post(TODO_KEY, todo)
+        .catch(err => {
+            console.error('Cannot add todo:', err)
+            throw err
+        })
+
+
+}
+
+function _edit(todo) {
+    todo.updatedAt = Date.now()
+    return storageService.put(TODO_KEY, todo)
+        .catch(err => {
+            console.error('Cannot update todo:', err)
+            throw err
+        })
+}
+
+function getDoneTodosPercent() {
+    return storageService.query(TODO_KEY)
+        .then(todos => {
+            const doneTodosCount = todos.reduce((acc, todo) => {
+                if (todo.isDone) acc++
+                return acc
+            }, 0)
+
+            return (doneTodosCount / todos.length) * 100 || 0
+        })
+        .catch(err => {
+            console.error('Cannot get done todos percent:', err)
+            throw err
+        })
+}
+
+function getMaxPage() {
+    if (gFilteredTodosLength) return Promise.resolve(Math.ceil(gFilteredTodosLength / PAGE_SIZE))
+
+    return storageService.query(TODO_KEY)
+        .then(todos => Math.ceil(todos.length / PAGE_SIZE))
+        .catch(err => {
+            console.error('Cannot get max page:', err)
+            throw err
+        })
 }
 
 function getEmptyTodo(txt = '', importance = 5) {
@@ -62,35 +147,30 @@ function getEmptyTodo(txt = '', importance = 5) {
 }
 
 function getDefaultFilter() {
-    return { txt: '', importance: 0 }
+    return { txt: '', isDone: 'all', importance: 0, pageIdx: 0, sort: '' }
 }
 
 function getFilterFromSearchParams(searchParams) {
-    const defaultFilter = getDefaultFilter()
-    const filterBy = {}
-    for (const field in defaultFilter) {
-        filterBy[field] = searchParams.get(field) || ''
+    const filterBy = {
+        txt: searchParams.get('txt') || '',
+        isDone: searchParams.get('isDone') || 'all',
+        importance: +searchParams.get('importance') || 0,
+        pageIdx: +searchParams.get('pageIdx') || 0,
+        sort: searchParams.get('sort') || ''
     }
+
     return filterBy
 }
 
 
-function getImportanceStats() {
-    return storageService.query(TODO_KEY)
-        .then(todos => {
-            const todoCountByImportanceMap = _getTodoCountByImportanceMap(todos)
-            const data = Object.keys(todoCountByImportanceMap).map(speedName => ({ title: speedName, value: todoCountByImportanceMap[speedName] }))
-            return data
-        })
-
-}
+////////////////////////////////////
 
 function _createTodos() {
     let todos = utilService.loadFromStorage(TODO_KEY)
     if (!todos || !todos.length) {
         todos = []
         const txts = ['Learn React', 'Master CSS', 'Practice Redux']
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 8; i++) {
             const txt = txts[utilService.getRandomIntInclusive(0, txts.length - 1)]
             todos.push(_createTodo(txt + (i + 1), utilService.getRandomIntInclusive(1, 10)))
         }
@@ -102,6 +182,7 @@ function _createTodo(txt, importance) {
     const todo = getEmptyTodo(txt, importance)
     todo._id = utilService.makeId()
     todo.createdAt = todo.updatedAt = Date.now() - utilService.getRandomIntInclusive(0, 1000 * 60 * 60 * 24)
+    todo.color = utilService.getRandomColor()
     return todo
 }
 
@@ -116,6 +197,16 @@ function _setNextPrevTodoId(todo) {
     })
 }
 
+function getImportanceStats() {
+    return storageService.query(TODO_KEY)
+        .then(todos => {
+            const todoCountByImportanceMap = _getTodoCountByImportanceMap(todos)
+            const data = Object.keys(todoCountByImportanceMap).map(speedName => ({ title: speedName, value: todoCountByImportanceMap[speedName] }))
+            return data
+        })
+
+}
+
 function _getTodoCountByImportanceMap(todos) {
     const todoCountByImportanceMap = todos.reduce((map, todo) => {
         if (todo.importance < 3) map.low++
@@ -128,12 +219,12 @@ function _getTodoCountByImportanceMap(todos) {
 
 
 // Data Model:
-const todo = {
-    _id: "gZ6Nvy",
-    txt: "Master Redux",
-    importance: 9,
-    isDone: false,
-    createdAt: 1711472269690,
-    updatedAt: 1711472269690
-}
+// const todo = {
+//     _id: "gZ6Nvy",
+//     txt: "Master Redux",
+//     importance: 9,
+//     isDone: false,
+//     createdAt: 1711472269690,
+//     updatedAt: 1711472269690
+// }
 
