@@ -1,51 +1,59 @@
-const { useState } = React
 const { Link, NavLink } = ReactRouterDOM
-const { useNavigate } = ReactRouter
-const { useSelector, useDispatch } = ReactRedux
+const { useSelector } = ReactRedux
 
-import { userService } from '../services/user.service.js'
+import { logout } from '../store/actions/user.actions.js'
+
 import { UserMsg } from "./UserMsg.jsx"
 import { LoginSignup } from './LoginSignup.jsx'
 import { showErrorMsg } from '../services/event-bus.service.js'
+import { TodosProgress } from './TodosProgress.jsx'
 
 
 export function AppHeader() {
-    const navigate = useNavigate()
-    const [user, setUser] = useState(userService.getLoggedinUser())
+
+    const loggedinUser = useSelector((storeState) => storeState.loggedinUser)
+    const doneTodosPercent = useSelector((storeState) => storeState.doneTodosPercent)
 
     function onLogout() {
-        userService.logout()
+        logout()
             .then(() => {
-                onSetUser(null)
+                console.log('bye');
             })
             .catch((err) => {
                 showErrorMsg('OOPs try again')
             })
     }
 
-    function onSetUser(user) {
-        setUser(user)
-        navigate('/')
+    function getStyleByUser() {
+        if (!loggedinUser) return {}
+        const { color, bgColor: backgroundColor } = loggedinUser.pref
+        return { color, backgroundColor }
     }
-    return (
-        <header className="app-header full main-layout">
-            <section className="header-container">
-                <h1>React Todo App</h1>
-                {user ? (
-                    < section >
 
-                        <Link to={`/user/${user._id}`}>Hello {user.fullname}</Link>
-                        <button onClick={onLogout}>Logout</button>
-                    </ section >
-                ) : (
-                    <section>
-                        <LoginSignup onSetUser={onSetUser} />
-                    </section>
-                )}
+    return (
+        <header style={getStyleByUser()} className="app-header full main-layout">
+            <section className="header-container">
+                <div>
+                    <h1 className='title'>React Todo App</h1>
+                    {loggedinUser
+                        ? (< section className="flex space-between align-center container">
+                            <div className='user-head'>
+                                <Link to={`/user`}>{loggedinUser.fullname}</Link>
+                                <p className='p-balance'>Your balance is {loggedinUser.balance}</p>
+                                <button className='btn-login' onClick={onLogout}>Logout</button>
+                            </div>
+                            {doneTodosPercent !== undefined &&
+                                <TodosProgress doneTodosPercent={doneTodosPercent} />
+                            }
+                        </ section >)
+                        : (<section>
+                            <LoginSignup />
+                        </section>)}
+                </div>
                 <nav className="app-nav">
                     <NavLink to="/" >Home</NavLink>
-                    <NavLink to="/about" >About</NavLink>
                     <NavLink to="/todo" >Todos</NavLink>
+                    <NavLink to="/user" >Profile</NavLink>
                     <NavLink to="/dashboard" >Dashboard</NavLink>
                 </nav>
             </section>

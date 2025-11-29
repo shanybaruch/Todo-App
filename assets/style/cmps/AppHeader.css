@@ -1,17 +1,30 @@
 .app-header {
     background-color: var(--gray3);
     color: var(--clr2bg-light);
-    padding: 10px 0px;
+    padding: .8em 0px;
+
+    .btn-login {
+        border-radius: .5em;
+    }
+
+    .p-balance {
+        margin: 0;
+    }
 }
 
 .header-container {
     display: flex;
     align-items: center;
     flex-direction: column;
+
+    .user-head {
+        display: flex;
+        justify-content: center;
+    }
 }
 
-.header-container h1 {
-    flex-grow: 1;
+.header-container .title {
+    /* flex-grow: 1; */
 }
 
 .app-nav {
@@ -19,13 +32,55 @@
     gap: 1em;
 
     a {
+        transition: .3s;
         font-weight: 100;
+
+        &:hover {
+            scale: 1.1;
+        }
     }
 }
 
 a.active {
     color: rgb(241, 212, 241);
     font-weight: 600;
+    scale: 1.1;
+
+}
+
+.header-container .container {
+    gap: 2em;
+}
+
+.todos-progress {
+    text-align: center;
+}
+
+.progress-bar-container {
+    border-radius: .8em;
+    font-size: .9rem;
+    max-width: 250px;
+    width: 20vw;
+    height: 30px;
+    background-color: white;
+    margin: auto;
+    position: relative;
+}
+
+.progress-bar-container div {
+    background-color: limegreen;
+    height: 100%;
+    transition: 0.4s;
+    border-radius: .8em;
+}
+
+.progress-bar-container span {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    color: rgb(8, 3, 28);
 }
 
 @media (max-width: 720px) {

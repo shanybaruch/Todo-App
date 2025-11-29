@@ -1,12 +1,11 @@
 .todo-index {
     div { 
-        margin: 0 .5em;
         margin-bottom: .5em;
-        .btn-add {
-            padding: .2em .3em;
-            margin: 0;
-            font-size: .9rem;
-        }
+    }
+    .add-todo-btn {
+        padding: .2em .3em;
+        margin: 0;
+        font-size: .9rem;
     }
 
 }

@@ -68,7 +68,6 @@ export function TodoEdit() {
                 <label htmlFor="isDone">isDone:</label>
                 <input onChange={handleChange} value={isDone} type="checkbox" name="isDone" id="isDone" />
 
-
                 <button>Save</button>
             </form>
         </section>

@@ -12,6 +12,7 @@ import { AboutTeam } from "./cmps/AboutTeam.jsx"
 import { AboutVision } from "./cmps/AboutVision.jsx"
 import { Dashboard } from "./pages/Dashboard.jsx"
 import { store } from './store/store.js'
+import { AppFooter } from "./cmps/AppFooter.jsx"
 
 export function RootCmp() {
 
@@ -36,6 +37,7 @@ export function RootCmp() {
 
                         </Routes>
                     </main>
+                    <AppFooter />
                 </section>
             </Router>
         </Provider>
