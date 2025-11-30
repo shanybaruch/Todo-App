@@ -53,8 +53,10 @@ function appReducer(state = initialState, cmd = {}) {
     }
 }
 
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+export const store = createStore(rootReducer, composeEnhancers())
 
-export const store = createStore(appReducer)
+// export const store = createStore(appReducer)
 // console.log('store:', store)
 
 window.gStore = store

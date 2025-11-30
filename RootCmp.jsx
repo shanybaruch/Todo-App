@@ -13,6 +13,7 @@ import { AboutVision } from "./cmps/AboutVision.jsx"
 import { Dashboard } from "./pages/Dashboard.jsx"
 import { store } from './store/store.js'
 import { AppFooter } from "./cmps/AppFooter.jsx"
+import { UserDetails } from './pages/UserDetails.jsx'
 
 export function RootCmp() {
 
@@ -34,7 +35,7 @@ export function RootCmp() {
                             <Route path="/todo/edit" element={<TodoEdit />} />
                             <Route path="/todo" element={<TodoIndex />} />
                             <Route path="/dashboard" element={<Dashboard />} />
-
+                            <Route path={'/user'} element={<UserDetails />} />
                         </Routes>
                     </main>
                     <AppFooter />
