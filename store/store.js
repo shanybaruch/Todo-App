@@ -44,9 +44,9 @@ function appReducer(state = initialState, cmd = {}) {
         case SET_IS_LOADING:
             return { ...state, isLoading: cmd.isLoading }
         case SET_USER:
-            return { ...state, loggedinUser: cmd.loggedinUser }
+            return { ...state, loggedinUser: cmd.user }
         case SET_USER_BALANCE:
-            return { ...state, loggedinUser: { ...cmd.loggedinUser, score: cmd.score } }
+            return { ...state, loggedinUser: { ...loggedinUser, balance: cmd.balance } }
         
         default: 
             return state
@@ -54,7 +54,7 @@ function appReducer(state = initialState, cmd = {}) {
 }
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-export const store = createStore(rootReducer, composeEnhancers())
+export const store = createStore(appReducer, composeEnhancers())
 
 // export const store = createStore(appReducer)
 // console.log('store:', store)

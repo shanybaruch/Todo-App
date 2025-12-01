@@ -2,7 +2,6 @@ const { Link, NavLink } = ReactRouterDOM
 const { useSelector } = ReactRedux
 
 import { logout } from '../store/actions/user.actions.js'
-
 import { UserMsg } from "./UserMsg.jsx"
 import { LoginSignup } from './LoginSignup.jsx'
 import { showErrorMsg } from '../services/event-bus.service.js'
@@ -11,7 +10,10 @@ import { TodosProgress } from './TodosProgress.jsx'
 
 export function AppHeader() {
 
-    const loggedinUser = useSelector((storeState) => storeState.loggedinUser)
+    const loggedinUser = useSelector((storeState) => {
+        console.log('Current Store State:', storeState.loggedinUser); 
+        return storeState.loggedinUser
+    })
     const doneTodosPercent = useSelector((storeState) => storeState.doneTodosPercent)
 
     function onLogout() {

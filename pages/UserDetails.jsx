@@ -32,6 +32,7 @@ export function UserDetails() {
     function onEditUser(ev) {
         ev.preventDefault()
         const userToUpdate = {
+            ...loggedinUser,
             fullname: userDetailsToEdit.fullname,
             pref: { color: userDetailsToEdit.color, bgColor: userDetailsToEdit.bgColor }
         }
